@@ -29,6 +29,15 @@ const DEFAULT_SKILLS = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Google 403 Bypass Handler
+  const btnBypass = document.getElementById('btn-bypass-403');
+  if (btnBypass) {
+    btnBypass.addEventListener('click', () => {
+      window.open('https://www.dola.com/chat/', '_blank');
+    });
+  }
+
   initPWA();
   initNavigation();
   initDrawer();

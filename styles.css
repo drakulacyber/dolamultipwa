@@ -761,3 +761,55 @@ body {
   opacity: 0;
   pointer-events: none;
 }
+
+
+/* Google Auth / 403 Bypass Bar */
+.google-auth-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.6);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 50;
+  max-width: 90%;
+}
+
+.auth-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.btn-auth-action {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.btn-auth-action:hover {
+  background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+}
+
+.btn-auth-action:active {
+  transform: scale(0.96);
+}

@@ -52,7 +52,17 @@
   <main class="single-viewport-container">
     <!-- View 1: Dola AI Chat (Default) -->
     <div class="app-screen-layer active" id="layer-dola">
-      <iframe id="iframe-dola" src="https://www.dola.com/chat/" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+      <!-- Floating Bypass Google 403 & Direct Session Bar -->
+      <div class="google-auth-bar" id="google-auth-bar">
+        <div class="auth-bar-text">
+          <span class="auth-icon">🔒</span>
+          <span>Google 403 / Login Terblokir?</span>
+        </div>
+        <button id="btn-bypass-403" class="btn-auth-action" title="Buka Dola Chat langsung tanpa blokir Google">
+          🚀 Buka Sesi Langsung (Anti 403)
+        </button>
+      </div>
+      <iframe id="iframe-dola" src="https://www.dola.com/chat/" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"></iframe>
     </div>
 
     <!-- View 2: SaveVideoRaw -->
