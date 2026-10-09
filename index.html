@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Dola Multi Browser & Skill Hub</title>
+  <title>DolaHub Workspace</title>
   
-  <!-- Android & iOS PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#111827">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,125 +17,251 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Top Control Bar (Desktop & Landscape) -->
-  <header class="app-header">
-    <div class="panel-header-left">
-      <div class="badge studio-badge">AI Studio</div>
-      <div class="nav-actions">
-        <button id="left-reload" class="icon-btn" title="Muat Ulang">🔄</button>
-        <button id="left-external" class="icon-btn" title="Buka Tab Terpisah">↗</button>
+  <!-- Modern Android Top Bar -->
+  <header class="top-nav-bar">
+    <button id="btn-hamburger" class="hamburger-btn" aria-label="Menu" title="Menu Aplikasi">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    
+    <div class="app-brand">
+      <div class="brand-avatar">D</div>
+      <div class="brand-info">
+        <h1>DolaHub</h1>
+        <span class="badge-tag" id="current-mode-tag">Split 2 Tampilan</span>
       </div>
-      <input type="text" id="left-url" class="url-bar" value="https://aistudio.google.com/apps" />
     </div>
 
-    <!-- Center Hub & Presets -->
-    <div class="center-bar">
-      <div class="preset-pills">
-        <button id="preset-50" class="pill-btn active">50:50</button>
-        <button id="preset-70" class="pill-btn">70:30</button>
-        <button id="preset-30" class="pill-btn">30:70</button>
+    <div class="top-bar-actions">
+      <!-- Quick View Switcher Buttons -->
+      <div class="view-pill-group">
+        <button id="view-tab-1" class="view-pill" title="Tampilan SaveVideoRaw">📹 Video</button>
+        <button id="view-tab-split" class="view-pill active" title="Tampilan Berdampingan / 2 Tampilan">⚡ Split 2</button>
+        <button id="view-tab-2" class="view-pill" title="Tampilan Dola.com">💬 Dola</button>
       </div>
-      <button id="btn-skills-hub" class="hub-btn">🧩 Skill Hub (<span id="skill-count">0</span>)</button>
-      <button id="btn-ext-hub" class="hub-btn">🔌 Ekstensi</button>
-      <button id="btn-pwa-install" class="install-btn hidden">📲 Pasang di Android</button>
-    </div>
 
-    <div class="panel-header-right">
-      <input type="text" id="right-url" class="url-bar" value="https://www.dola.com/chat/" />
-      <div class="nav-actions">
-        <button id="right-reload" class="icon-btn" title="Muat Ulang">🔄</button>
-        <button id="right-external" class="icon-btn" title="Buka Tab Terpisah">↗</button>
-      </div>
-      <div class="badge dola-badge">Dola.com</div>
+      <button id="btn-quick-add" class="btn-icon-highlight" title="Tambah / Ganti Web Baru">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+
+      <button id="btn-pwa-install" class="btn-install-badge hidden" title="Pasang di Android">
+        📲 Pasang
+      </button>
     </div>
   </header>
 
-  <!-- Mobile Bottom / Top Switcher (Tampak khusus di Smartphone Android) -->
-  <div class="mobile-switch-bar">
-    <button id="mob-tab-studio" class="mob-tab-btn active">✨ AI Studio</button>
-    <button id="mob-tab-split" class="mob-tab-btn">⚡ Split Keduanya</button>
-    <button id="mob-tab-dola" class="mob-tab-btn">💬 Dola Chat</button>
-    <button id="mob-btn-install" class="mob-tab-btn install-mob hidden">📲 Pasang</button>
-  </div>
-
-  <!-- Workspace Split View -->
-  <main class="workspace-container" id="workspace">
-    <!-- Panel Kiri: Google AI Studio -->
-    <section class="browser-panel left-panel" id="panel-left">
-      <div class="panel-mobile-header">
-        <span>✨ Google AI Studio</span>
-        <button onclick="window.open(document.getElementById('left-url').value, '_blank')" class="mob-ext-btn">Buka ↗</button>
+  <!-- Side Navigation Drawer (Menu Garis Tiga) -->
+  <div id="drawer-backdrop" class="drawer-backdrop hidden"></div>
+  <aside id="side-drawer" class="side-drawer">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <div class="brand-logo">D</div>
+        <div>
+          <h3>DolaHub Pro</h3>
+          <p>Multi-Web & Skill Workspace</p>
+        </div>
       </div>
-      <iframe id="iframe-left" src="https://aistudio.google.com/apps" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+      <button id="drawer-close" class="btn-close-drawer">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Section: Mode 2 Tampilan -->
+      <div class="drawer-section">
+        <label class="section-label">MODE TAMPILAN</label>
+        <div class="drawer-menu-list">
+          <button id="menu-view-split" class="drawer-item active">
+            <span class="item-icon">⚡</span>
+            <div class="item-text">
+              <strong>Split 2 Tampilan</strong>
+              <small>SaveVideoRaw & Dola berdampingan</small>
+            </div>
+          </button>
+          <button id="menu-view-left" class="drawer-item">
+            <span class="item-icon">📹</span>
+            <div class="item-text">
+              <strong>SaveVideoRaw Penuh</strong>
+              <small>Fokus unduh video raw</small>
+            </div>
+          </button>
+          <button id="menu-view-right" class="drawer-item">
+            <span class="item-icon">💬</span>
+            <div class="item-text">
+              <strong>Dola Chat Penuh</strong>
+              <small>Fokus chat assist & prompt</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section: Tambah Web Cepat (Web Launcher) -->
+      <div class="drawer-section">
+        <div class="section-header-flex">
+          <label class="section-label">WEB & TOOL TAMBAHAN</label>
+          <button id="drawer-add-web-btn" class="text-btn">+ Tambah</button>
+        </div>
+        <div id="custom-web-list" class="drawer-web-list">
+          <!-- Web item dynamically rendered here -->
+        </div>
+      </div>
+
+      <!-- Section: Skill & Fitur Ekstra -->
+      <div class="drawer-section">
+        <label class="section-label">FITUR & INTEGRASI</label>
+        <div class="drawer-menu-list">
+          <button id="drawer-btn-skills" class="drawer-item">
+            <span class="item-icon">🧩</span>
+            <div class="item-text">
+              <strong>Dola Skill Hub</strong>
+              <small>Kelola instruksi SKILL.md (<span id="drawer-skill-count">0</span>)</small>
+            </div>
+          </button>
+          <button id="drawer-btn-ext" class="drawer-item">
+            <span class="item-icon">🔌</span>
+            <div class="item-text">
+              <strong>Ekstensi & MCP Server</strong>
+              <small>Konektor alat & crawler</small>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button id="drawer-install-btn" class="drawer-install-btn hidden">
+        📲 Pasang Aplikasi di Android
+      </button>
+      <div class="app-version">DolaHub v2.0 • Android PWA Ready</div>
+    </div>
+  </aside>
+
+  <!-- Workspace Container: 2 Tampilan Web -->
+  <main class="workspace" id="workspace">
+    <!-- Panel 1: SaveVideoRaw -->
+    <section class="web-panel panel-one" id="panel-1">
+      <div class="panel-sub-header">
+        <div class="sub-title">
+          <span class="dot video-dot"></span>
+          <span id="title-panel-1">SaveVideoRaw</span>
+        </div>
+        <div class="panel-controls">
+          <button id="reload-panel-1" class="sub-btn" title="Muat Ulang">🔄</button>
+          <button id="change-panel-1" class="sub-btn" title="Ganti URL">🌐</button>
+          <button id="ext-panel-1" class="sub-btn" title="Buka Tab Terpisah">↗</button>
+        </div>
+      </div>
+      <iframe id="iframe-1" src="https://savevideoraw.com/" allow="clipboard-read; clipboard-write; microphone; camera; download" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"></iframe>
     </section>
 
     <!-- Resizer Divider Handle -->
-    <div class="split-divider" id="divider" title="Geser untuk mengatur lebar layar">
-      <div class="divider-grip"></div>
+    <div class="resizer-divider" id="resizer-divider" title="Geser untuk atur rasio">
+      <div class="resizer-knob"></div>
     </div>
 
-    <!-- Panel Kanan: Dola.com Chat -->
-    <section class="browser-panel right-panel" id="panel-right">
-      <div class="panel-mobile-header">
-        <span>💬 Dola Chat</span>
-        <button onclick="window.open(document.getElementById('right-url').value, '_blank')" class="mob-ext-btn">Buka ↗</button>
+    <!-- Panel 2: Dola.com Chat -->
+    <section class="web-panel panel-two" id="panel-2">
+      <div class="panel-sub-header">
+        <div class="sub-title">
+          <span class="dot dola-dot"></span>
+          <span id="title-panel-2">Dola Chat</span>
+        </div>
+        <div class="panel-controls">
+          <button id="reload-panel-2" class="sub-btn" title="Muat Ulang">🔄</button>
+          <button id="change-panel-2" class="sub-btn" title="Ganti URL">🌐</button>
+          <button id="ext-panel-2" class="sub-btn" title="Buka Tab Terpisah">↗</button>
+        </div>
       </div>
-      <iframe id="iframe-right" src="https://www.dola.com/chat/" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+      <iframe id="iframe-2" src="https://www.dola.com/chat/" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
     </section>
   </main>
 
-  <!-- Skill Hub Modal -->
-  <div id="modal-skills" class="modal-backdrop hidden">
-    <div class="modal-window">
-      <div class="modal-header">
-        <div class="modal-title">
-          <h2>🧩 Dola Skill Hub</h2>
-          <span class="sub">Kelola instruksi SKILL.md & prompt instan</span>
+  <!-- Modal: Tambah Web Cepat (Web Launcher) -->
+  <div id="modal-add-web" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>🌐 Tambahkan Web Baru</h3>
+        <button id="close-add-web-modal" class="btn-close-modal">✕</button>
+      </div>
+      <form id="form-add-web" class="modal-form">
+        <div class="form-group">
+          <label for="web-name-input">Nama Web / Judul:</label>
+          <input type="text" id="web-name-input" placeholder="Misal: YouTube, Google, Pinterest" required />
         </div>
-        <div class="modal-top-actions">
-          <label class="btn-import">
+        <div class="form-group">
+          <label for="web-url-input">Alamat URL Web:</label>
+          <input type="url" id="web-url-input" placeholder="https://example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Buka Langsung Di:</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill">
+              <input type="radio" name="target-panel" value="1" checked />
+              <span>Ganti Panel 1 (Kiri/Atas)</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="target-panel" value="2" />
+              <span>Ganti Panel 2 (Kanan/Bawah)</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="target-panel" value="bookmark" />
+              <span>Simpan ke Menu Saja</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" id="cancel-add-web" class="btn-secondary">Batal</button>
+          <button type="submit" class="btn-primary">Tambahkan & Buka</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Dola Skill Hub -->
+  <div id="modal-skills" class="modal-backdrop hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-head">
+        <div>
+          <h3>🧩 Dola Skill Hub</h3>
+          <small style="color:#94a3b8;">Instruksi prompt terintegrasi tanpa mengganggu berkas lain</small>
+        </div>
+        <div class="head-actions">
+          <label class="btn-primary-small">
             + Tambah Skill (.md)
             <input type="file" id="skill-file-input" accept=".md,.txt" style="display: none;" />
           </label>
-          <button id="modal-skills-close" class="close-btn">✕</button>
+          <button id="close-skills-modal" class="btn-close-modal">✕</button>
         </div>
       </div>
-      <div class="modal-content-grid">
-        <aside class="skill-nav" id="skill-nav-list"></aside>
-        <section class="skill-preview-area" id="skill-preview-area">
-          <div class="empty-state">Pilih salah satu skill di sebelah kiri atau unggah file SKILL.md baru.</div>
-        </section>
+      <div class="modal-split-body">
+        <div class="skill-sidebar" id="skill-sidebar-list"></div>
+        <div class="skill-content" id="skill-content-view">
+          <div class="empty-placeholder">Pilih skill untuk menyalin prompt ke clipboard.</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Extension Hub Modal -->
+  <!-- Modal: Ekstensi & MCP -->
   <div id="modal-ext" class="modal-backdrop hidden">
-    <div class="modal-window small-window">
-      <div class="modal-header">
-        <div class="modal-title">
-          <h2>🔌 Extension & Integration Hub</h2>
-          <span class="sub">Dola MCP Server & Chrome Extension Connectors</span>
-        </div>
-        <button id="modal-ext-close" class="close-btn">✕</button>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>🔌 Ekstensi & Integrasi</h3>
+        <button id="close-ext-modal" class="btn-close-modal">✕</button>
       </div>
-      <div class="modal-content-padded">
-        <div class="ext-card">
-          <div class="ext-meta">
-            <h4>Dola MCP Server Connector</h4>
-            <p>Integrasi Model Context Protocol langsung dari Dola dashboard ke antarmuka AI Studio.</p>
+      <div class="modal-padded-body">
+        <div class="ext-item-box">
+          <div>
+            <strong>SaveVideoRaw Downloader Helper</strong>
+            <p>Memungkinkan pengunduhan video format raw langsung ke memori perangkat.</p>
           </div>
-          <span class="tag-status">Tersedia</span>
+          <span class="active-badge">Aktif</span>
         </div>
-        <div class="ext-card">
-          <div class="ext-meta">
-            <h4>Doubao & Dola Web Clipper</h4>
-            <p>Ekstensi pengambil ringkasan konten cepat untuk Dola Chat.</p>
+        <div class="ext-item-box">
+          <div>
+            <strong>Dola MCP Context Server</strong>
+            <p>Jembatan API Model Context Protocol untuk percakapan AI cerdas.</p>
           </div>
-          <span class="tag-status">Tersedia</span>
-        </div>
-        <div class="info-note">
-          💡 <strong>Tips Android:</strong> Aplikasi PWA ini dapat dipasang ke layar beranda ponsel Anda dan dapat dirotasi ke mode Landscape untuk pengalaman split-screen seperti tablet/desktop.
+          <span class="active-badge">Aktif</span>
         </div>
       </div>
     </div>

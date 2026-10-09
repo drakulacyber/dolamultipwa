@@ -1,13 +1,13 @@
 {
-  "name": "Dola Multi Browser & Skill Hub",
+  "name": "Dola & Video Workspace Hub",
   "short_name": "DolaHub",
-  "description": "Multi-browser split workspace for Google AI Studio & Dola.com with Skill & Extension Manager",
+  "description": "Professional multi-view workspace for SaveVideoRaw & Dola.com with Web Launcher and Skill Hub",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f172a",
-  "theme_color": "#1e293b",
+  "background_color": "#0b0f19",
+  "theme_color": "#111827",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -25,6 +25,6 @@
   "categories": [
     "productivity",
     "utilities",
-    "developer"
+    "multimedia"
   ]
 }

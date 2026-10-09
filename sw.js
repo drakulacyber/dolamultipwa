@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dola-hub-pwa-v1';
+const CACHE_NAME = 'dolahub-pwa-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -11,25 +11,16 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[PWA SW] Pre-caching offline shell');
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(
+      keys.map((k) => { if (k !== CACHE_NAME) return caches.delete(k); })
+    ))
   );
   self.clients.claim();
 });
@@ -37,9 +28,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).catch(() => {
+    caches.match(event.request).then((resp) => {
+      return resp || fetch(event.request).catch(() => {
         if (event.request.headers.get('accept')?.includes('text/html')) {
           return caches.match('./index.html');
         }
