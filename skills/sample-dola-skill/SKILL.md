@@ -1,0 +1,1 @@
+# Dola Default Prompt Skill\n> Asisten sinkronisasi AI Studio & Dola\n\nInstruksi: Berikan output ringkas, akurat, dan format code blocks terpisah.

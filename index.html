@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dola Multi Browser & Skill Hub</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DolaHub">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="panel-header-left">
+      <div class="badge studio-badge">AI Studio</div>
+      <div class="nav-actions">
+        <button id="left-reload" class="icon-btn" title="Muat Ulang">🔄</button>
+        <button id="left-external" class="icon-btn" title="Buka Tab Terpisah">↗</button>
+      </div>
+      <input type="text" id="left-url" class="url-bar" value="https://aistudio.google.com/apps" />
+    </div>
+
+    <!-- Center Hub & Presets -->
+    <div class="center-bar">
+      <div class="preset-pills">
+        <button id="preset-50" class="pill-btn active">50:50</button>
+        <button id="preset-70" class="pill-btn">70:30</button>
+        <button id="preset-30" class="pill-btn">30:70</button>
+      </div>
+      <button id="btn-skills-hub" class="hub-btn">🧩 Skill Hub (<span id="skill-count">0</span>)</button>
+      <button id="btn-ext-hub" class="hub-btn">🔌 Ekstensi</button>
+      <button id="btn-pwa-install" class="install-btn hidden">📥 Pasang Aplikasi</button>
+    </div>
+
+    <div class="panel-header-right">
+      <input type="text" id="right-url" class="url-bar" value="https://www.dola.com/chat/" />
+      <div class="nav-actions">
+        <button id="right-reload" class="icon-btn" title="Muat Ulang">🔄</button>
+        <button id="right-external" class="icon-btn" title="Buka Tab Terpisah">↗</button>
+      </div>
+      <div class="badge dola-badge">Dola.com</div>
+    </div>
+  </header>
+
+  <!-- Workspace Split View -->
+  <main class="workspace-container" id="workspace">
+    <!-- Panel Kiri: Google AI Studio -->
+    <section class="browser-panel left-panel" id="panel-left">
+      <div class="iframe-overlay-guide" id="left-fallback" style="display: none;">
+        <div class="guide-box">
+          <h3>⚡ Mode Keamanan Google AI Studio</h3>
+          <p>Jika situs membatasi embedding langsung (X-Frame-Options), gunakan opsi di bawah ini untuk pengalaman optimal:</p>
+          <div class="guide-buttons">
+            <button class="action-btn" onclick="openPopup('left')">Buka Side-by-Side Popup</button>
+            <button class="action-btn secondary" onclick="openDirect('left')">Buka di Tab Baru ↗</button>
+          </div>
+        </div>
+      </div>
+      <iframe id="iframe-left" src="https://aistudio.google.com/apps" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+    </section>
+
+    <!-- Resizer Divider Handle -->
+    <div class="split-divider" id="divider" title="Geser untuk mengatur lebar layar">
+      <div class="divider-grip"></div>
+    </div>
+
+    <!-- Panel Kanan: Dola.com Chat -->
+    <section class="browser-panel right-panel" id="panel-right">
+      <div class="iframe-overlay-guide" id="right-fallback" style="display: none;">
+        <div class="guide-box">
+          <h3>⚡ Mode Keamanan Dola Chat</h3>
+          <p>Dola.com dapat dibuka langsung atau menggunakan popup sinkronisasi:</p>
+          <div class="guide-buttons">
+            <button class="action-btn" onclick="openPopup('right')">Buka Side-by-Side Popup</button>
+            <button class="action-btn secondary" onclick="openDirect('right')">Buka di Tab Baru ↗</button>
+          </div>
+        </div>
+      </div>
+      <iframe id="iframe-right" src="https://www.dola.com/chat/" allow="clipboard-read; clipboard-write; microphone; camera" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+    </section>
+  </main>
+
+  <!-- Skill Hub Modal -->
+  <div id="modal-skills" class="modal-backdrop hidden">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2>🧩 Dola Skill Hub</h2>
+          <span class="sub">Kelola instruksi SKILL.md & prompt instan</span>
+        </div>
+        <div class="modal-top-actions">
+          <label class="btn-import">
+            + Tambah / Unggah Skill (.md)
+            <input type="file" id="skill-file-input" accept=".md,.txt" style="display: none;" />
+          </label>
+          <button id="modal-skills-close" class="close-btn">✕</button>
+        </div>
+      </div>
+      <div class="modal-content-grid">
+        <aside class="skill-nav" id="skill-nav-list"></aside>
+        <section class="skill-preview-area" id="skill-preview-area">
+          <div class="empty-state">Pilih salah satu skill di sebelah kiri atau unggah file SKILL.md baru.</div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extension Hub Modal -->
+  <div id="modal-ext" class="modal-backdrop hidden">
+    <div class="modal-window small-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2>🔌 Extension & Integration Hub</h2>
+          <span class="sub">Dola MCP Server & Chrome Extension Connectors</span>
+        </div>
+        <button id="modal-ext-close" class="close-btn">✕</button>
+      </div>
+      <div class="modal-content-padded">
+        <div class="ext-card">
+          <div class="ext-meta">
+            <h4>Dola MCP Server Connector</h4>
+            <p>Integrasi Model Context Protocol langsung dari Dola dashboard ke antarmuka AI Studio.</p>
+          </div>
+          <span class="tag-status">Tersedia</span>
+        </div>
+        <div class="ext-card">
+          <div class="ext-meta">
+            <h4>Doubao & Dola Web Clipper</h4>
+            <p>Ekstensi pengambil ringkasan konten cepat untuk Dola Chat.</p>
+          </div>
+          <span class="tag-status">Tersedia</span>
+        </div>
+        <div class="info-note">
+          💡 <strong>Tips PWA:</strong> Pada Progressive Web App, ekstensi peramban bawaan Chrome/Edge Anda dapat langsung aktif pada tab browser atau jendela PWA yang terpasang.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>
