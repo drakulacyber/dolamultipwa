@@ -3,8 +3,9 @@
   "short_name": "DolaHub",
   "description": "Multi-browser split workspace for Google AI Studio & Dola.com with Skill & Extension Manager",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "landscape-primary",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#1e293b",
   "icons": [

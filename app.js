@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initResizer();
   initNavigation();
   initModals();
+  initMobileTabs();
 });
 
 // PWA Service Worker & Install Prompt Registration
@@ -310,4 +311,61 @@ function showToast(text) {
 function escapeHtml(str) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+
+// Tambahan handling Mobile Tabs di Android
+function initMobileTabs() {
+  const tabStudio = document.getElementById('mob-tab-studio');
+  const tabSplit = document.getElementById('mob-tab-split');
+  const tabDola = document.getElementById('mob-tab-dola');
+  const mobInstall = document.getElementById('mob-btn-install');
+  
+  const panelLeft = document.getElementById('panel-left');
+  const panelRight = document.getElementById('panel-right');
+  const workspace = document.getElementById('workspace');
+
+  if (!tabStudio) return;
+
+  function clearMobileTabs() {
+    tabStudio.classList.remove('active');
+    tabSplit.classList.remove('active');
+    tabDola.classList.remove('active');
+    workspace.classList.remove('mobile-split');
+    panelLeft.classList.remove('mobile-hidden');
+    panelRight.classList.remove('mobile-hidden');
+  }
+
+  tabStudio.addEventListener('click', () => {
+    clearMobileTabs();
+    tabStudio.classList.add('active');
+    panelRight.classList.add('mobile-hidden');
+  });
+
+  tabDola.addEventListener('click', () => {
+    clearMobileTabs();
+    tabDola.classList.add('active');
+    panelLeft.classList.add('mobile-hidden');
+  });
+
+  tabSplit.addEventListener('click', () => {
+    clearMobileTabs();
+    tabSplit.classList.add('active');
+    workspace.classList.add('mobile-split');
+  });
+
+  // Default portrait mobile view -> Google AI Studio
+  if (window.innerWidth <= 768) {
+    panelRight.classList.add('mobile-hidden');
+  }
+
+  // Sync PWA Prompt to Mobile button
+  window.addEventListener('beforeinstallprompt', () => {
+    if (mobInstall) mobInstall.classList.remove('hidden');
+  });
+  if (mobInstall) {
+    mobInstall.addEventListener('click', () => {
+      document.getElementById('btn-pwa-install').click();
+    });
+  }
 }
