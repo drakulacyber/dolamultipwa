@@ -1,71 +1,155 @@
 // Global State
+let currentActiveView = 'dola'; // 'dola', 'video', 'custom'
 let deferredInstallPrompt = null;
-let currentMode = 'split'; // 'split', 'panel1', 'panel2'
-let customWebList = [];
+let savedBookmarks = [];
 let skills = [];
 let activeSkill = null;
-let isResizing = false;
 
 // Default Web Bookmarks
-const DEFAULT_WEB_BOOKMARKS = [
+const DEFAULT_BOOKMARKS = [
   { id: 'bm-1', name: 'SaveVideoRaw', url: 'https://savevideoraw.com/' },
-  { id: 'bm-2', name: 'Dola Chat', url: 'https://www.dola.com/chat/' },
-  { id: 'bm-3', name: 'Cobalt Video Downloader', url: 'https://cobalt.tools/' }
+  { id: 'bm-2', name: 'Cobalt Tools', url: 'https://cobalt.tools/' },
+  { id: 'bm-3', name: 'Dola Chat', url: 'https://www.dola.com/chat/' }
 ];
 
 // Default Skills
 const DEFAULT_SKILLS = [
   {
-    id: 'skill-prompt-1',
-    title: 'Dola Video Summary & Prompt Assistant',
+    id: 'skill-1',
+    title: 'Dola Video Analyzer & Prompt Pro',
     filename: 'video-helper.md',
-    content: `# Dola Video Summary & Prompt Assistant\n> Gunakan skill ini bersama SaveVideoRaw untuk mengekstrak dan menganalisis video\n\nInstruksi:\n1. Analisis URL video yang baru diunduh.\n2. Buat ringkasan poin-poin utama video.\n3. Siapkan rekomendasi format ekspor terbaik.\n`
+    content: `# Dola Video Analyzer & Prompt Pro\n> Prompt khusus kolaborasi dengan SaveVideoRaw\n\nInstruksi:\n1. Bantu pengguna menganalisis konten video yang telah diunduh.\n2. Berikan saran transkrip atau ringkasan poin utama.\n3. Siapkan rekomendasi format video terbaik untuk media sosial.\n`
+  },
+  {
+    id: 'skill-2',
+    title: 'Dola AI General Assistant',
+    filename: 'general-assistant.md',
+    content: `# Dola AI General Assistant\n> Instruksi respons cerdas dan ringkas\n\nInstruksi:\n1. Berikan jawaban langsung ke inti masalah.\n2. Gunakan bahasa Indonesia profesional dan mudah dipahami.\n`
   }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
   initPWA();
+  initNavigation();
   initDrawer();
-  initViewModes();
-  initQuickWebAdder();
+  initLauncherModal();
   initSkills();
-  initResizer();
-  loadSavedWebs();
+  loadBookmarks();
 });
 
-// 1. PWA ServiceWorker & Install Handlers
+// 1. PWA ServiceWorker & Android Installation
 function initPWA() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(console.warn);
   }
 
-  const topInstallBtn = document.getElementById('btn-pwa-install');
-  const drawerInstallBtn = document.getElementById('drawer-install-btn');
+  const drawerInstallBtn = document.getElementById('drawer-btn-install');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    topInstallBtn.classList.remove('hidden');
     drawerInstallBtn.classList.remove('hidden');
   });
 
-  const triggerInstall = async () => {
+  drawerInstallBtn.addEventListener('click', async () => {
     if (!deferredInstallPrompt) return;
     deferredInstallPrompt.prompt();
     const { outcome } = await deferredInstallPrompt.userChoice;
     if (outcome === 'accepted') {
       showToast('Aplikasi berhasil dipasang di Android!');
-      topInstallBtn.classList.add('hidden');
       drawerInstallBtn.classList.add('hidden');
     }
     deferredInstallPrompt = null;
-  };
-
-  topInstallBtn.addEventListener('click', triggerInstall);
-  drawerInstallBtn.addEventListener('click', triggerInstall);
+  });
 }
 
-// 2. Drawer Navigation (Menu Garis Tiga)
+// 2. Navigation: SATU TAMPILAN PENUH (Single View Switcher)
+function initNavigation() {
+  const tabs = document.querySelectorAll('.nav-tab');
+  const titleText = document.getElementById('app-title-text');
+  const urlDisplay = document.getElementById('current-url-display');
+  const loadingBar = document.getElementById('loading-bar');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.target;
+      if (target === 'add') {
+        openLauncherSheet();
+      } else if (target === 'skills') {
+        openSkillsSheet();
+      } else {
+        switchScreen(target);
+      }
+    });
+  });
+
+  // Top Bar Actions
+  document.getElementById('btn-refresh').addEventListener('click', () => {
+    triggerLoading();
+    if (currentActiveView === 'dola') {
+      document.getElementById('iframe-dola').src = document.getElementById('iframe-dola').src;
+    } else if (currentActiveView === 'video') {
+      document.getElementById('iframe-video').src = document.getElementById('iframe-video').src;
+    } else if (currentActiveView === 'custom') {
+      document.getElementById('iframe-custom').src = document.getElementById('iframe-custom').src;
+    }
+  });
+
+  document.getElementById('btn-add-quick').addEventListener('click', openLauncherSheet);
+
+  document.getElementById('btn-open-external').addEventListener('click', () => {
+    let url = 'https://www.dola.com/chat/';
+    if (currentActiveView === 'video') url = 'https://savevideoraw.com/';
+    if (currentActiveView === 'custom') url = document.getElementById('iframe-custom').src;
+    window.open(url, '_blank');
+  });
+
+  // Floating Quick Prompt Button
+  document.getElementById('fab-skills').addEventListener('click', openSkillsSheet);
+}
+
+function switchScreen(viewName, customUrl = null, customTitle = null) {
+  currentActiveView = viewName;
+
+  // Sembunyikan semua layer dan aktifkan hanya layer yang dipilih
+  document.querySelectorAll('.app-screen-layer').forEach(layer => layer.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.drawer-nav-item').forEach(d => d.classList.remove('active'));
+
+  const titleText = document.getElementById('app-title-text');
+  const urlDisplay = document.getElementById('current-url-display');
+
+  if (viewName === 'dola') {
+    document.getElementById('layer-dola').classList.add('active');
+    document.getElementById('tab-dola').classList.add('active');
+    document.getElementById('drawer-nav-dola').classList.add('active');
+    titleText.textContent = 'Dola AI Chat';
+    urlDisplay.textContent = 'dola.com/chat';
+  } else if (viewName === 'video') {
+    document.getElementById('layer-video').classList.add('active');
+    document.getElementById('tab-video').classList.add('active');
+    document.getElementById('drawer-nav-video').classList.add('active');
+    titleText.textContent = 'SaveVideoRaw';
+    urlDisplay.textContent = 'savevideoraw.com';
+  } else if (viewName === 'custom') {
+    document.getElementById('layer-custom').classList.add('active');
+    if (customUrl) {
+      document.getElementById('iframe-custom').src = customUrl;
+    }
+    titleText.textContent = customTitle || 'Web Tambahan';
+    urlDisplay.textContent = (customUrl || document.getElementById('iframe-custom').src).replace(/^https?:\/\//i, '');
+  }
+
+  triggerLoading();
+}
+
+function triggerLoading() {
+  const bar = document.getElementById('loading-bar');
+  bar.classList.add('loading');
+  setTimeout(() => bar.classList.remove('loading'), 1200);
+}
+
+// 3. Side Navigation Drawer (Garis Tiga)
 function initDrawer() {
   const hamburger = document.getElementById('btn-hamburger');
   const drawer = document.getElementById('side-drawer');
@@ -86,252 +170,134 @@ function initDrawer() {
   closeBtn.addEventListener('click', closeDrawer);
   backdrop.addEventListener('click', closeDrawer);
 
-  // Drawer View Mode Links
-  document.getElementById('menu-view-split').addEventListener('click', () => {
-    setViewMode('split');
+  // Drawer Navigation Items
+  document.getElementById('drawer-nav-dola').addEventListener('click', () => {
+    switchScreen('dola');
     closeDrawer();
   });
-  document.getElementById('menu-view-left').addEventListener('click', () => {
-    setViewMode('panel1');
+  document.getElementById('drawer-nav-video').addEventListener('click', () => {
+    switchScreen('video');
     closeDrawer();
   });
-  document.getElementById('menu-view-right').addEventListener('click', () => {
-    setViewMode('panel2');
+  document.getElementById('drawer-btn-add-web').addEventListener('click', () => {
     closeDrawer();
+    openLauncherSheet();
   });
-
-  // Drawer Skills & Extensions
-  document.getElementById('drawer-btn-skills').addEventListener('click', () => {
+  document.getElementById('drawer-nav-skills').addEventListener('click', () => {
     closeDrawer();
-    document.getElementById('modal-skills').classList.remove('hidden');
+    openSkillsSheet();
   });
-  document.getElementById('drawer-btn-ext').addEventListener('click', () => {
+  document.getElementById('drawer-nav-ext').addEventListener('click', () => {
     closeDrawer();
     document.getElementById('modal-ext').classList.remove('hidden');
   });
-}
-
-// 3. View Switcher (2 Tampilan / Split vs Single)
-function initViewModes() {
-  const tab1 = document.getElementById('view-tab-1');
-  const tabSplit = document.getElementById('view-tab-split');
-  const tab2 = document.getElementById('view-tab-2');
-
-  tab1.addEventListener('click', () => setViewMode('panel1'));
-  tabSplit.addEventListener('click', () => setViewMode('split'));
-  tab2.addEventListener('click', () => setViewMode('panel2'));
-
-  // Panel Control Buttons (Reload, Open External, Change URL)
-  document.getElementById('reload-panel-1').addEventListener('click', () => {
-    document.getElementById('iframe-1').src = document.getElementById('iframe-1').src;
+  document.getElementById('close-ext-modal').addEventListener('click', () => {
+    document.getElementById('modal-ext').classList.add('hidden');
   });
-  document.getElementById('reload-panel-2').addEventListener('click', () => {
-    document.getElementById('iframe-2').src = document.getElementById('iframe-2').src;
-  });
-
-  document.getElementById('ext-panel-1').addEventListener('click', () => {
-    window.open(document.getElementById('iframe-1').src, '_blank');
-  });
-  document.getElementById('ext-panel-2').addEventListener('click', () => {
-    window.open(document.getElementById('iframe-2').src, '_blank');
-  });
-
-  document.getElementById('change-panel-1').addEventListener('click', () => openChangeUrlModal(1));
-  document.getElementById('change-panel-2').addEventListener('click', () => openChangeUrlModal(2));
-
-  // Set default mode
-  setViewMode('split');
-}
-
-function setViewMode(mode) {
-  currentMode = mode;
-  const p1 = document.getElementById('panel-1');
-  const p2 = document.getElementById('panel-2');
-  const ws = document.getElementById('workspace');
-  const tag = document.getElementById('current-mode-tag');
-
-  const tab1 = document.getElementById('view-tab-1');
-  const tabSplit = document.getElementById('view-tab-split');
-  const tab2 = document.getElementById('view-tab-2');
-
-  tab1.classList.remove('active');
-  tabSplit.classList.remove('active');
-  tab2.classList.remove('active');
-
-  p1.classList.remove('panel-hidden', 'panel-full');
-  p2.classList.remove('panel-hidden', 'panel-full');
-  ws.classList.remove('split-mode');
-
-  if (mode === 'split') {
-    tabSplit.classList.add('active');
-    ws.classList.add('split-mode');
-    tag.textContent = 'Split 2 Tampilan';
-    p1.style.width = '';
-    p2.style.width = '';
-  } else if (mode === 'panel1') {
-    tab1.classList.add('active');
-    p2.classList.add('panel-hidden');
-    p1.classList.add('panel-full');
-    tag.textContent = 'SaveVideoRaw Penuh';
-  } else if (mode === 'panel2') {
-    tab2.classList.add('active');
-    p1.classList.add('panel-hidden');
-    p2.classList.add('panel-full');
-    tag.textContent = 'Dola Chat Penuh';
-  }
 }
 
 // 4. Quick Add Web Modal & Bookmark System
-function initQuickWebAdder() {
-  const modal = document.getElementById('modal-add-web');
-  const btnTopAdd = document.getElementById('btn-quick-add');
-  const btnDrawerAdd = document.getElementById('drawer-add-web-btn');
-  const btnClose = document.getElementById('close-add-web-modal');
-  const btnCancel = document.getElementById('cancel-add-web');
-  const form = document.getElementById('form-add-web');
+function initLauncherModal() {
+  const modal = document.getElementById('modal-web-launcher');
+  const closeBtn = document.getElementById('close-launcher-modal');
+  const cancelBtn = document.getElementById('btn-cancel-launcher');
+  const form = document.getElementById('form-launcher');
 
-  const showModal = () => modal.classList.remove('hidden');
-  const hideModal = () => modal.classList.add('hidden');
+  const hide = () => modal.classList.add('hidden');
+  closeBtn.addEventListener('click', hide);
+  cancelBtn.addEventListener('click', hide);
 
-  btnTopAdd.addEventListener('click', showModal);
-  btnDrawerAdd.addEventListener('click', () => {
-    document.getElementById('side-drawer').classList.remove('open');
-    document.getElementById('drawer-backdrop').classList.add('hidden');
-    showModal();
+  // Preset Chips
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById('input-web-name').value = chip.dataset.name;
+      document.getElementById('input-web-url').value = chip.dataset.url;
+    });
   });
-  btnClose.addEventListener('click', hideModal);
-  btnCancel.addEventListener('click', hideModal);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('web-name-input').value.trim();
-    let url = document.getElementById('web-url-input').value.trim();
-    const target = form.elements['target-panel'].value;
+    const name = document.getElementById('input-web-name').value.trim();
+    let url = document.getElementById('input-web-url').value.trim();
 
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
-    const newBookmark = { id: 'bm-' + Date.now(), name, url };
-    customWebList.push(newBookmark);
-    saveWebs();
-    renderWebBookmarks();
-
-    if (target === '1') {
-      document.getElementById('iframe-1').src = url;
-      document.getElementById('title-panel-1').textContent = name;
-      showToast(`Web "${name}" dibuka di Panel 1`);
-    } else if (target === '2') {
-      document.getElementById('iframe-2').src = url;
-      document.getElementById('title-panel-2').textContent = name;
-      showToast(`Web "${name}" dibuka di Panel 2`);
-    } else {
-      showToast(`Web "${name}" disimpan ke menu`);
+    // Simpan ke daftar bookmark
+    const exists = savedBookmarks.some(b => b.url === url);
+    if (!exists) {
+      savedBookmarks.push({ id: 'bm-' + Date.now(), name, url });
+      saveBookmarks();
+      renderBookmarks();
     }
 
+    // Langsung buka di Satu Layar Utama Penuh
+    switchScreen('custom', url, name);
+    showToast(`Membuka "${name}" di Layar Utama`);
+    hide();
     form.reset();
-    hideModal();
   });
 }
 
-function openChangeUrlModal(panelNum) {
-  const modal = document.getElementById('modal-add-web');
-  const form = document.getElementById('form-add-web');
-  form.elements['target-panel'].value = String(panelNum);
-  modal.classList.remove('hidden');
+function openLauncherSheet() {
+  document.getElementById('modal-web-launcher').classList.remove('hidden');
 }
 
-function loadSavedWebs() {
-  const saved = localStorage.getItem('dolahub_webs');
+function loadBookmarks() {
+  const saved = localStorage.getItem('dolapro_bookmarks');
   if (saved) {
-    try { customWebList = JSON.parse(saved); } catch(e) { customWebList = [...DEFAULT_WEB_BOOKMARKS]; }
+    try { savedBookmarks = JSON.parse(saved); } catch (e) { savedBookmarks = [...DEFAULT_BOOKMARKS]; }
   } else {
-    customWebList = [...DEFAULT_WEB_BOOKMARKS];
-    saveWebs();
+    savedBookmarks = [...DEFAULT_BOOKMARKS];
+    saveBookmarks();
   }
-  renderWebBookmarks();
+  renderBookmarks();
 }
 
-function saveWebs() {
-  localStorage.setItem('dolahub_webs', JSON.stringify(customWebList));
+function saveBookmarks() {
+  localStorage.setItem('dolapro_bookmarks', JSON.stringify(savedBookmarks));
 }
 
-function renderWebBookmarks() {
-  const container = document.getElementById('custom-web-list');
-  container.innerHTML = '';
+function renderBookmarks() {
+  const list = document.getElementById('drawer-bookmark-list');
+  list.innerHTML = '';
 
-  customWebList.forEach((bm) => {
+  savedBookmarks.forEach(bm => {
     const item = document.createElement('div');
-    item.className = 'web-bookmark-item';
+    item.className = 'bm-item';
     item.innerHTML = `
       <span>${escapeHtml(bm.name)}</span>
-      <div class="web-bookmark-actions">
-        <button class="mini-action-btn" title="Buka di Panel 1">P1</button>
-        <button class="mini-action-btn" title="Buka di Panel 2">P2</button>
-        <button class="mini-action-btn" title="Hapus" style="color:#f87171;">✕</button>
+      <div class="bm-btns">
+        <button class="bm-btn-open">Buka</button>
+        <button class="bm-btn-del" title="Hapus">✕</button>
       </div>
     `;
 
-    const [btnP1, btnP2, btnDel] = item.querySelectorAll('.mini-action-btn');
-
-    btnP1.addEventListener('click', () => {
-      document.getElementById('iframe-1').src = bm.url;
-      document.getElementById('title-panel-1').textContent = bm.name;
-      showToast(`Dibuka di Panel 1: ${bm.name}`);
+    item.querySelector('.bm-btn-open').addEventListener('click', () => {
+      if (bm.url.includes('dola.com')) {
+        switchScreen('dola');
+      } else if (bm.url.includes('savevideoraw')) {
+        switchScreen('video');
+      } else {
+        switchScreen('custom', bm.url, bm.name);
+      }
       document.getElementById('side-drawer').classList.remove('open');
       document.getElementById('drawer-backdrop').classList.add('hidden');
+      showToast(`Layar: ${bm.name}`);
     });
 
-    btnP2.addEventListener('click', () => {
-      document.getElementById('iframe-2').src = bm.url;
-      document.getElementById('title-panel-2').textContent = bm.name;
-      showToast(`Dibuka di Panel 2: ${bm.name}`);
-      document.getElementById('side-drawer').classList.remove('open');
-      document.getElementById('drawer-backdrop').classList.add('hidden');
+    item.querySelector('.bm-btn-del').addEventListener('click', () => {
+      savedBookmarks = savedBookmarks.filter(x => x.id !== bm.id);
+      saveBookmarks();
+      renderBookmarks();
     });
 
-    btnDel.addEventListener('click', () => {
-      customWebList = customWebList.filter(x => x.id !== bm.id);
-      saveWebs();
-      renderWebBookmarks();
-    });
-
-    container.appendChild(item);
+    list.appendChild(item);
   });
 }
 
-// 5. Resizer Logic (Desktop & Tablet)
-function initResizer() {
-  const divider = document.getElementById('resizer-divider');
-  const p1 = document.getElementById('panel-1');
-  const ws = document.getElementById('workspace');
-
-  divider.addEventListener('mousedown', () => {
-    isResizing = true;
-    divider.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isResizing || currentMode !== 'split') return;
-    const rect = ws.getBoundingClientRect();
-    const newWidth = e.clientX - rect.left;
-    if (newWidth > 180 && newWidth < rect.width - 180) {
-      const pct = (newWidth / rect.width) * 100;
-      p1.style.width = `${pct}%`;
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (isResizing) {
-      isResizing = false;
-      divider.classList.remove('dragging');
-      document.body.style.cursor = 'default';
-    }
-  });
-}
-
-// 6. Skill Hub Management
+// 5. Skill Hub
 function initSkills() {
-  const saved = localStorage.getItem('dolahub_skills');
+  const saved = localStorage.getItem('dolapro_skills');
   if (saved) {
     try { skills = JSON.parse(saved); } catch(e) { skills = [...DEFAULT_SKILLS]; }
   } else {
@@ -340,15 +306,11 @@ function initSkills() {
   }
   renderSkills();
 
-  // Close modals
   document.getElementById('close-skills-modal').addEventListener('click', () => {
     document.getElementById('modal-skills').classList.add('hidden');
   });
-  document.getElementById('close-ext-modal').addEventListener('click', () => {
-    document.getElementById('modal-ext').classList.add('hidden');
-  });
 
-  // Upload Skill File
+  // Upload Skill File (.md / .txt)
   const fileInput = document.getElementById('skill-file-input');
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -369,32 +331,33 @@ function initSkills() {
       saveSkills();
       renderSkills();
       selectSkill(newSkill);
-      showToast(`Skill "${title}" berhasil diimpor!`);
+      showToast(`Skill "${title}" tersimpan!`);
     };
     reader.readAsText(file);
     fileInput.value = '';
   });
 }
 
+function openSkillsSheet() {
+  document.getElementById('modal-skills').classList.remove('hidden');
+}
+
 function saveSkills() {
-  localStorage.setItem('dolahub_skills', JSON.stringify(skills));
-  document.getElementById('drawer-skill-count').textContent = skills.length;
+  localStorage.setItem('dolapro_skills', JSON.stringify(skills));
+  document.getElementById('bottom-skill-badge').textContent = skills.length;
 }
 
 function renderSkills() {
-  const nav = document.getElementById('skill-sidebar-list');
-  nav.innerHTML = '';
-  document.getElementById('drawer-skill-count').textContent = skills.length;
+  const container = document.getElementById('skill-chips-nav');
+  container.innerHTML = '';
+  document.getElementById('bottom-skill-badge').textContent = skills.length;
 
-  skills.forEach((s) => {
-    const card = document.createElement('div');
-    card.className = 'skill-tab-card' + (activeSkill && activeSkill.id === s.id ? ' active' : '');
-    card.innerHTML = `
-      <strong>${escapeHtml(s.title)}</strong>
-      <small>📄 ${escapeHtml(s.filename)}</small>
-    `;
-    card.addEventListener('click', () => selectSkill(s));
-    nav.appendChild(card);
+  skills.forEach(s => {
+    const chip = document.createElement('button');
+    chip.className = 'skill-chip-item' + (activeSkill && activeSkill.id === s.id ? ' active' : '');
+    chip.textContent = s.title;
+    chip.addEventListener('click', () => selectSkill(s));
+    container.appendChild(chip);
   });
 
   if (!activeSkill && skills.length > 0) selectSkill(skills[0]);
@@ -402,36 +365,36 @@ function renderSkills() {
 
 function selectSkill(s) {
   activeSkill = s;
-  document.querySelectorAll('.skill-tab-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.skill-chip-item').forEach(c => c.classList.remove('active'));
   renderSkills();
 
-  const view = document.getElementById('skill-content-view');
-  view.innerHTML = `
+  const box = document.getElementById('skill-detail-box');
+  box.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <h4 style="color:white; font-size:14px;">${escapeHtml(s.title)}</h4>
-        <small style="color:#94a3b8;">${escapeHtml(s.filename)}</small>
+        <strong style="color:white; font-size:13px;">${escapeHtml(s.title)}</strong>
+        <div style="font-size:11px; color:#94a3b8;">${escapeHtml(s.filename)}</div>
       </div>
       <div style="display:flex; gap:6px;">
-        <button id="btn-copy-skill" class="btn-primary-small">📋 Salin</button>
-        <button id="btn-del-skill" class="btn-secondary" style="color:#f87171;">🗑️ Hapus</button>
+        <button id="btn-copy-prompt" style="background:#6366f1; color:white; border:none; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">📋 Salin</button>
+        <button id="btn-delete-skill" style="background:#1e293b; color:#f87171; border:1px solid #334155; padding:5px 8px; border-radius:6px; font-size:12px; cursor:pointer;">🗑️</button>
       </div>
     </div>
     <pre>${escapeHtml(s.content)}</pre>
   `;
 
-  document.getElementById('btn-copy-skill').addEventListener('click', () => {
+  document.getElementById('btn-copy-prompt').addEventListener('click', () => {
     navigator.clipboard.writeText(s.content);
     showToast('Prompt berhasil disalin ke clipboard!');
   });
 
-  document.getElementById('btn-del-skill').addEventListener('click', () => {
+  document.getElementById('btn-delete-skill').addEventListener('click', () => {
     if (confirm(`Hapus skill "${s.title}"?`)) {
       skills = skills.filter(x => x.id !== s.id);
       saveSkills();
       activeSkill = null;
       renderSkills();
-      view.innerHTML = '<div class="empty-placeholder">Skill telah dihapus.</div>';
+      box.innerHTML = '<div class="empty-hint">Skill telah dihapus.</div>';
     }
   });
 }
@@ -440,7 +403,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), 2500);
+  setTimeout(() => t.classList.add('hidden'), 2200);
 }
 
 function escapeHtml(text) {

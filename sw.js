@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dolahub-pwa-v2';
+const CACHE_NAME = 'dolapro-pwa-v3';
 const ASSETS = [
   './',
   './index.html',

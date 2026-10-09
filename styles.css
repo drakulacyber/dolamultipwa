@@ -7,257 +7,312 @@
 }
 
 :root {
-  --bg-primary: #0b0f19;
-  --bg-card: #151d2f;
-  --bg-header: #111827;
+  --bg-dark: #090d16;
+  --bg-topbar: #0f172a;
+  --bg-card: #162032;
+  --bg-sheet: #111827;
   --accent: #6366f1;
-  --accent-hover: #4f46e5;
+  --accent-light: #818cf8;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --border-color: #27354f;
-  --video-color: #ef4444;
-  --dola-color: #10b981;
+  --border: #1e293b;
+  --success: #10b981;
 }
 
 body {
-  background: var(--bg-primary);
+  background: var(--bg-dark);
   color: var(--text-main);
   height: 100vh;
   height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
-/* Modern Top Navigation Bar */
-.top-nav-bar {
-  height: 54px;
-  background: var(--bg-header);
-  border-bottom: 1px solid var(--border-color);
+/* 1. Android Top Navigation Bar */
+.android-topbar {
+  height: 56px;
+  background: var(--bg-topbar);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  gap: 10px;
+  gap: 8px;
   z-index: 50;
   flex-shrink: 0;
 }
 
-/* Hamburger Button (Garis Tiga) */
-.hamburger-btn {
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.icon-touch-btn {
   background: transparent;
   border: none;
-  width: 40px;
-  height: 40px;
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.15s;
+  flex-shrink: 0;
 }
 
-.hamburger-btn:hover, .hamburger-btn:active {
-  background: #1e293b;
+.icon-touch-btn:active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.hamburger-btn .bar {
-  width: 20px;
-  height: 2px;
-  background-color: var(--text-main);
-  border-radius: 2px;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-/* App Brand */
-.app-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.brand-avatar {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #6366f1, #3b82f6);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 16px;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
-}
-
-.brand-info h1 {
+.header-titles h1 {
   font-size: 15px;
   font-weight: 700;
-  line-height: 1.1;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
-.badge-tag {
-  font-size: 10px;
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
   color: var(--text-muted);
-  font-weight: 500;
 }
 
-/* Top Actions */
-.top-bar-actions {
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Loading Bar */
+.loading-progress {
+  height: 2px;
+  width: 100%;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-progress.loading {
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: moveProgress 1.2s infinite ease-in-out;
+}
+
+@keyframes moveProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 2. Single Viewport Screen (SATU TAMPILAN PENUH) */
+.single-viewport-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+.app-screen-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.app-screen-layer.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  z-index: 5;
+}
+
+.app-screen-layer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+}
+
+/* 3. Floating Quick Prompt Action Button (FAB) */
+.floating-fab {
+  position: fixed;
+  bottom: 72px;
+  right: 16px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 30px;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.45);
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 40;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.view-pill-group {
+.floating-fab:active {
+  transform: scale(0.95);
+}
+
+/* 4. Android Bottom Navigation Bar */
+.android-bottom-nav {
+  height: 60px;
+  background: var(--bg-topbar);
+  border-top: 1px solid var(--border);
   display: flex;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  padding: 2px;
-  border-radius: 8px;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  z-index: 45;
+  flex-shrink: 0;
 }
 
-.view-pill {
+.nav-tab {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 9px;
-  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
   cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
 }
 
-.view-pill.active {
-  background: var(--accent);
-  color: #ffffff;
+.nav-tab.active {
+  color: var(--accent-light);
 }
 
-.btn-icon-highlight {
-  background: #1e293b;
-  border: 1px solid var(--border-color);
-  color: #38bdf8;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.tab-icon {
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.btn-icon-highlight:hover, .btn-icon-highlight:active {
-  background: #38bdf8;
-  color: #0b0f19;
+.add-center-icon {
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 8px;
+  color: var(--accent);
 }
 
-.btn-install-badge {
-  background: #10b981;
-  color: #ffffff;
-  border: none;
+.tab-label {
   font-size: 11px;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  animation: pulse 2s infinite;
-  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-/* Side Navigation Drawer */
+/* 5. Android Navigation Drawer (Menu Garis Tiga) */
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 100;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
 }
 
 .drawer-backdrop.hidden {
   display: none;
 }
 
-.side-drawer {
+.android-drawer {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  width: 300px;
-  max-width: 82vw;
-  background: #111827;
-  border-right: 1px solid var(--border-color);
+  width: 310px;
+  max-width: 84vw;
+  background: var(--bg-topbar);
+  border-right: 1px solid var(--border);
   z-index: 110;
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 10px 0 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 12px 0 30px rgba(0, 0, 0, 0.6);
 }
 
-.side-drawer.open {
+.android-drawer.open {
   transform: translateX(0);
 }
 
-.drawer-header {
-  padding: 16px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.drawer-brand {
+.drawer-top-profile {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.brand-logo {
-  width: 36px;
-  height: 36px;
-  background: var(--accent);
-  color: white;
-  border-radius: 10px;
-  font-weight: 800;
+.profile-avatar {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #6366f1, #38bdf8);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 800;
+  color: white;
   font-size: 18px;
 }
 
-.drawer-brand h3 {
+.profile-info h3 {
   font-size: 15px;
+  font-weight: 700;
   color: white;
 }
 
-.drawer-brand p {
-  font-size: 11px;
+.version-pill {
+  font-size: 10px;
+  background: #1e293b;
   color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.btn-close-drawer {
+.drawer-close-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
   font-size: 20px;
-  padding: 4px 8px;
+  margin-left: auto;
   cursor: pointer;
+  padding: 6px;
 }
 
-.drawer-body {
+.drawer-scroll-content {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
@@ -266,46 +321,45 @@ body {
   gap: 20px;
 }
 
-.drawer-section {
+.drawer-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.section-label {
+.group-title {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.8px;
   color: #64748b;
   text-transform: uppercase;
 }
 
-.section-header-flex {
+.group-title-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
-.text-btn {
+.add-mini-text {
   background: transparent;
   border: none;
-  color: #38bdf8;
+  color: var(--accent-light);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.drawer-menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.drawer-item {
+.drawer-nav-item {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -314,35 +368,35 @@ body {
   transition: all 0.15s;
 }
 
-.drawer-item:hover, .drawer-item.active {
+.drawer-nav-item:active, .drawer-nav-item.active {
   border-color: var(--accent);
   background: #1e293b;
 }
 
-.drawer-item .item-icon {
+.nav-symbol {
   font-size: 18px;
 }
 
-.drawer-item .item-text strong {
+.nav-detail strong {
   display: block;
   font-size: 13px;
   color: white;
 }
 
-.drawer-item .item-text small {
+.nav-detail small {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.drawer-web-list {
+.bookmark-container {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.web-bookmark-item {
-  background: #1a2234;
-  border: 1px solid var(--border-color);
+.bm-item {
+  background: #151d2f;
+  border: 1px solid var(--border);
   padding: 8px 12px;
   border-radius: 8px;
   display: flex;
@@ -350,373 +404,288 @@ body {
   align-items: center;
 }
 
-.web-bookmark-item span {
+.bm-item span {
   font-size: 13px;
   color: #f1f5f9;
 }
 
-.web-bookmark-actions {
+.bm-btns {
   display: flex;
   gap: 4px;
 }
 
-.mini-action-btn {
-  background: #27354f;
+.bm-btn-open {
+  background: var(--accent);
+  color: white;
   border: none;
-  color: #cbd5e1;
   font-size: 11px;
-  padding: 4px 8px;
+  font-weight: 600;
+  padding: 4px 10px;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.mini-action-btn:hover {
-  background: var(--accent);
-  color: white;
-}
-
-.drawer-footer {
-  padding: 16px;
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.drawer-install-btn {
-  background: #10b981;
-  color: white;
+.bm-btn-del {
+  background: transparent;
   border: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
+  color: #f87171;
+  font-size: 14px;
+  padding: 2px 6px;
   cursor: pointer;
 }
 
-.app-version {
+.drawer-bottom-action {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.install-android-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.drawer-footer-text {
   font-size: 10px;
   color: #64748b;
   text-align: center;
 }
 
-/* Workspace 2 Tampilan */
-.workspace {
-  flex: 1;
-  display: flex;
-  position: relative;
-  overflow: hidden;
-  background: #000;
-}
-
-.web-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.panel-one {
-  width: 50%;
-}
-
-.panel-two {
-  width: 50%;
-}
-
-.panel-sub-header {
-  height: 34px;
-  background: #162032;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  flex-shrink: 0;
-}
-
-.sub-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #e2e8f0;
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.video-dot {
-  background: var(--video-color);
-  box-shadow: 0 0 6px var(--video-color);
-}
-
-.dola-dot {
-  background: var(--dola-color);
-  box-shadow: 0 0 6px var(--dola-color);
-}
-
-.panel-controls {
-  display: flex;
-  gap: 4px;
-}
-
-.sub-btn {
-  background: #232d42;
-  border: 1px solid var(--border-color);
-  color: #cbd5e1;
-  font-size: 11px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.sub-btn:hover {
-  background: #334155;
-  color: white;
-}
-
-.web-panel iframe {
-  width: 100%;
-  flex: 1;
-  border: none;
-  background: #ffffff;
-}
-
-/* Resizer Divider */
-.resizer-divider {
-  width: 8px;
-  background: #111827;
-  cursor: col-resize;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-
-.resizer-divider:hover, .resizer-divider.dragging {
-  background: var(--accent);
-}
-
-.resizer-knob {
-  width: 2px;
-  height: 32px;
-  background: #64748b;
-  border-radius: 2px;
-}
-
-/* Modals */
+/* 6. Bottom Sheet Modals (Gaya Android Material Sheet) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  z-index: 200;
+  backdrop-filter: blur(4px);
+  z-index: 120;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 16px;
 }
 
 .modal-backdrop.hidden {
   display: none;
 }
 
-.modal-card {
-  background: #162032;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  width: 460px;
-  max-width: 96vw;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+.android-sheet {
+  background: var(--bg-sheet);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 85vh;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
+  animation: slideUp 0.25s ease-out;
   overflow: hidden;
 }
 
-.modal-card.modal-large {
-  width: 800px;
-  height: 520px;
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
-.modal-head {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border-color);
+.sheet-indicator {
+  width: 36px;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+  margin: 10px auto 4px auto;
+}
+
+.sheet-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.modal-head h3 {
-  font-size: 15px;
+.sheet-header h3 {
+  font-size: 16px;
   color: white;
 }
 
-.btn-close-modal {
+.sheet-close {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
+  padding: 4px 8px;
 }
 
-.modal-form {
-  padding: 18px;
+.sheet-form {
+  padding: 16px 18px 24px 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.form-group {
+.form-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-group label {
+.form-field label {
   font-size: 12px;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
-.form-group input[type="text"],
-.form-group input[type="url"] {
-  background: #0b0f19;
-  border: 1px solid var(--border-color);
+.form-field input {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
   color: white;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
   outline: none;
 }
 
-.form-group input:focus {
+.form-field input:focus {
   border-color: var(--accent);
 }
 
-.radio-pill-group {
+.quick-preset-chips {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
-.radio-pill {
-  background: #0f172a;
-  border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  border-radius: 8px;
+.preset-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chip {
+  background: #1e293b;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.chip:active {
+  background: var(--accent);
+  color: white;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit {
+  flex: 2;
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Sheet Large (Skills) */
+.android-sheet.sheet-large {
+  max-height: 88vh;
+  height: 80vh;
+}
+
+.header-right-btns {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  cursor: pointer;
 }
 
-.radio-pill input {
-  accent-color: var(--accent);
-}
-
-.modal-foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.btn-secondary {
-  background: #1e293b;
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-primary {
+.btn-chip-action {
   background: var(--accent);
   color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-.btn-primary-small {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.modal-split-body {
-  display: flex;
+.skills-sheet-content {
   flex: 1;
-  overflow: hidden;
-}
-
-.skill-sidebar {
-  width: 250px;
-  background: #111827;
-  border-right: 1px solid var(--border-color);
-  padding: 10px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  overflow: hidden;
+  padding: 14px;
+  gap: 10px;
 }
 
-.skill-tab-card {
-  background: #1a2234;
-  border: 1px solid var(--border-color);
-  padding: 8px 10px;
-  border-radius: 6px;
+.skill-chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.skill-chip-item {
+  background: #1e293b;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
   cursor: pointer;
 }
 
-.skill-tab-card.active {
+.skill-chip-item.active {
+  background: var(--accent);
   border-color: var(--accent);
-  background: #212c44;
+  color: white;
 }
 
-.skill-tab-card strong {
-  font-size: 12px;
-  display: block;
-}
-
-.skill-tab-card small {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.skill-content {
+.skill-detail-display {
   flex: 1;
-  padding: 16px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.skill-content pre {
-  background: #0b0f19;
-  border: 1px solid var(--border-color);
-  padding: 12px;
-  border-radius: 8px;
+.skill-detail-display pre {
+  font-family: monospace;
   font-size: 12px;
   line-height: 1.5;
   color: #cbd5e1;
@@ -725,29 +694,30 @@ body {
   overflow-y: auto;
 }
 
-.modal-padded-body {
-  padding: 16px;
+.sheet-body-padded {
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.ext-item-box {
-  background: #0f172a;
-  border: 1px solid var(--border-color);
-  padding: 12px;
-  border-radius: 8px;
+.status-card {
+  background: #162032;
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.ext-item-box strong {
+.status-info strong {
   font-size: 13px;
+  color: white;
   display: block;
 }
 
-.ext-item-box p {
+.status-info p {
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -761,19 +731,28 @@ body {
   border-radius: 6px;
 }
 
+.empty-hint {
+  margin: auto;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Toast */
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 74px;
   left: 50%;
   transform: translateX(-50%);
-  background: #10b981;
+  background: rgba(16, 185, 129, 0.95);
+  backdrop-filter: blur(4px);
   color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 8px 18px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-  z-index: 300;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  z-index: 200;
   transition: opacity 0.3s;
   white-space: nowrap;
 }
@@ -781,66 +760,4 @@ body {
 .toast.hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-/* 📱 ANDROID & MOBILE OPTIMIZATIONS */
-@media (max-width: 768px) {
-  .top-nav-bar {
-    padding: 0 8px;
-  }
-
-  .view-pill-group {
-    padding: 1px;
-  }
-
-  .view-pill {
-    padding: 4px 6px;
-    font-size: 11px;
-  }
-
-  /* Mode 2 Tampilan pada HP Layar Potret: Atas & Bawah */
-  .workspace.split-mode {
-    flex-direction: column;
-  }
-
-  .workspace.split-mode .panel-one {
-    width: 100% !important;
-    height: 50% !important;
-  }
-
-  .workspace.split-mode .panel-two {
-    width: 100% !important;
-    height: 50% !important;
-  }
-
-  .resizer-divider {
-    display: none; /* Sembunyikan drag-resizer saat split potret di HP agar stabil */
-  }
-
-  /* Mode Satu Panel Penuh */
-  .panel-hidden {
-    display: none !important;
-  }
-
-  .panel-full {
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-  }
-
-  .modal-card.modal-large {
-    width: 95vw;
-    height: 80vh;
-  }
-
-  .modal-split-body {
-    flex-direction: column;
-  }
-
-  .skill-sidebar {
-    width: 100%;
-    height: 150px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-  }
 }
